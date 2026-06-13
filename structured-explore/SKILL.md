@@ -5,22 +5,22 @@ description: >-
   exploration directories. Use when the user wants to investigate a topic,
   research options, think through a design, gather information before committing
   to a solution, or decompose a large problem into smaller exploration areas.
-  This skill is for investigating problems, clarifying requirements, exploring
-  solution spaces, and organizing findings into a persistent, machine-readable
-  structure — NOT for implementing code or writing proposals. Trigger whenever
-  the user expresses intent to explore, investigate, research, or think through
-  something, even if they don't explicitly ask for structure. If the
-  exploration/ directory exists, always prefer this skill over raw conversation.
-  The structured output feeds directly into specification later.
+  This skill always discusses and iterates with the user first — files are only
+  created when the user explicitly says "capture it" or equivalent. Trigger
+  whenever the user expresses intent to explore, investigate, research, design,
+  or think through something, even if they don't explicitly ask for structure.
+  If the exploration/ directory exists in the project, use this skill instead of
+  plain conversation for any open-ended question or design discussion. Make sure
+  to use this skill whenever the user says "let me explore", "I'm wondering",
+  "how should we handle", "what approach", "think through", or similar — the
+  structured output feeds directly into specification later.
 license: MIT
 ---
 
 # Structured Exploration
 
-Exploration mode with persistent output. Think freely like openspec-explore, but
-when the user asks to explore or capture, write findings into the `exploration/`
-directory: one directory per area with a structured `README.md` and freeform
-`notes.md`.
+Exploration mode with persistent output. Think freely, but always iterate with
+the user before writing anything to disk.
 
 ## The Stance
 
@@ -32,31 +32,79 @@ Same as openspec-explore — curious, visual, adaptive, patient:
 - **Grounded** — Read the codebase and existing exploration areas, don't just theorize
 - **No rushing** — Let the shape of the problem emerge
 
-## Capture Permission Model
+## The Exploration Loop
 
-The skill has two modes depending on how the user phrases their request:
+This is THE core pattern. Every interaction follows this loop:
 
-**Explore Mode** (user is vague, wondering, or exploring freely):
-The user says things like "what about...", "I'm wondering...", "how would we handle..."
-→ Explore with diagrams and questions. Offer to capture when insights crystallize.
-Ask: "Want me to capture this in the exploration dir?"
+```
+  1. Listen & Map
+     └─ Understand the topic, read existing areas + codebase
+     └─ Check for overlapping areas
 
-**Capture Mode** (user expresses intent to explore and capture):
-The user says things like "let me explore [topic] properly", "capture these findings",
-"record this as an exploration area", "let me think through [topic] and document it"
-→ Explore AND capture. The user is literally asking you to produce structured docs.
-Do NOT just offer — they already said yes. Create the area, write the findings,
-update the dashboard. This is following instructions, not auto-capturing.
+  2. Discuss & Explore
+     └─ Present what you see/know (diagrams, comparisons)
+     └─ Ask open-ended questions
+     └─ Probe assumptions, surface edge cases, alternatives
 
-Examples of capture-intent phrases:
-- "Let me explore [X] properly" — the word "properly" signals they want structure
-- "Capture these findings" — explicit instruction
-- "Record this as an exploration area" — explicit instruction
-- "I want to think through [X] and document it" — intent to produce docs
-- "Let me investigate [X] systematically" — wants structured output
-- "Explore [X] and put it in the structure" — explicit reference
+        ┌──────────────────────────────┐
+        │  3. Pause & Ask Direction    │  ◄── KEY CHECKPOINT
+        │  "Is there more to explore?" │
+        │  "Shall I capture this?"     │
+        └──────────┬───────────────────┘
+                   │
+         ┌─────────┴─────────┐
+         ▼                   ▼
+    "Keep exploring"    "Yes, capture it"
+         │                   │
+         └──────┐   ┌────────┘
+                │   │
+                ▼   ▼
+         ┌──────────────────────┐
+         │  4. Present & Confirm │  ◄── KEY CHECKPOINT
+         │  "Here's what I'd    │
+         │   write — agree?"    │
+         └──────────┬───────────┘
+                    │
+                    ▼
+         ┌──────────────────────┐
+         │  5. Write to Files   │
+         │  (only after user    │
+         │   confirms content)  │
+         └──────────┬───────────┘
+                    │
+                    ▼
+         ┌──────────────────────┐
+         │  6. "What next?"     │
+         │  └─ loop back to (1) │
+         └──────────────────────┘
+```
 
-If unsure, default to Explore Mode (offer first).
+**No files are created at steps 1-3.** Steps 4-5 require explicit user
+confirmation. Step 3 and Step 4 are gates that must be passed before writing.
+
+## Permission Model
+
+The skill adapts how quickly it moves through the loop based on user intent.
+The difference is in *pace*, not in whether you ask for permission.
+
+**Explore Mode** (user is vague, wondering, or thinking freely):
+- Linger at steps 1-2. Explore with diagrams and questions.
+- At step 3, ask: "Want me to capture any of this?"
+- If yes → step 4 (present what to capture before writing).
+- If no → continue exploring.
+
+**Capture Mode** (user expresses intent to explore AND document):
+The user says "let me explore [X] properly", "capture these findings",
+"record this as an exploration area", "think through [X] and document it"
+— phrases that combine exploration with documentation intent.
+- Move through steps 1-2 faster (the user wants structured output).
+- At step 3, the user has already signaled capture intent, so move to step 4.
+- **Crucially: still do step 4 (Present & Confirm).** Present what you'd write
+  and ask "Does this look right?" before creating files.
+- Never skip step 4 — the user confirming the *topic* doesn't mean they've
+  confirmed the *content*.
+
+If unsure, default to Explore Mode.
 
 ## The Exploration Structure
 
@@ -237,11 +285,12 @@ What's missing before this can become a change proposal.
 URLs, quotes, half-formed ideas, research links, etc.
 ```
 
-After creating the bootstrap files, proceed with the Capture or Explore workflow below.
+After creating the bootstrap files, proceed with the workflow below.
 
-## Workflow: Capture Mode
+## Workflow: Following the Loop
 
-When the user expresses capture intent (see permission model above):
+This replaces the old separate Capture/Explore workflows. Every session follows
+The Exploration Loop above. The only variable is *pace*.
 
 ### Step 1: Read Context
 
@@ -257,16 +306,27 @@ Read existing area READMEs that might relate to the topic. If an area already
 covers similar ground, offer to update it instead of creating a new one.
 List the overlap clearly so the user can decide.
 
-### Step 3: Explore the Problem
+### Step 3-4: Discuss, Explore, Iterate (The Loop)
 
-Ground the exploration in the existing codebase and architecture. Use:
-- ASCII diagrams for system relationships, flows, comparisons
-- References to actual schema, API endpoints, code
-- Questions that probe assumptions and edge cases
+This is the core. Follow The Exploration Loop:
 
-### Step 4: Capture into Structure
+1. **Listen & Map** — Understand the topic, ground in codebase context
+2. **Discuss & Explore** — Use diagrams, comparisons, open questions
+3. **Pause & Ask Direction** — "Is there more? Or shall I capture this?"
+   - If "keep exploring" → loop back to step 2
+   - If "capture it" → move to step 4
+4. **Present & Confirm** — "Here's what I'd write. Does this look right?"
+   - Show the summary, scope, key findings you'd capture
+   - Wait for the user to agree before creating files
+5. **Write to Files** — Only now create or update files
+6. **"What next?"** — After writing, ask the user what to explore next
 
-Create or update the area directory:
+**Key rule**: Never skip step 4 (Present & Confirm). The user must see and
+approve what you plan to write before you write it.
+
+### Step 5: Capture into Structure
+
+Only proceed here after the user has confirmed the content at step 4.
 
 **For a new area:**
 ```
@@ -291,7 +351,7 @@ Then fill the README:
 
 Create `notes.md` with raw thoughts, URLs, code snippets, references.
 
-### Step 5: Update _index.md
+### Step 6: Update _index.md
 
 1. Add a row to the **Status Dashboard** (for new areas)
 2. Add a row to the **Session Log** (for this session)
@@ -300,24 +360,20 @@ Create `notes.md` with raw thoughts, URLs, code snippets, references.
 Always update `_index.md` before finishing — a new area without a dashboard entry
 is invisible. A session without a log entry is lost.
 
-## Workflow: Explore Mode
+### Step 7: Loop Back
 
-When the user is exploring freely (no capture intent):
-
-1. Read relevant existing areas to ground the discussion
-2. Use diagrams, comparisons, open questions
-3. When insights crystallize (design decisions, new areas, open questions identified),
-   offer to capture: "Want me to capture this in the exploration dir?"
-4. Wait for the user's response before creating files
+After writing, always ask: "What should we explore next?" This returns to
+step 1 of the loop for a new topic or step 2 for the same topic.
 
 ## Maintaining an Existing Area
 
 When the user asks to explore within an existing area, or findings update one:
 
 1. Read the area's README.md and notes.md
-2. Explore the new angle
-3. Offer to update: add findings, refine open questions, adjust status
+2. Explore the new angle (steps 2-3 of the loop)
+3. Present & Confirm: "I'd add [finding X] and refine [question Y] — agree?"
 4. If the user agrees, edit the README and update `last-updated` in frontmatter
+5. Ask: "What next?"
 
 ## Nuanced Actions
 
@@ -337,16 +393,21 @@ there, set the other to `dropped` with a redirect link.
 
 ## Guardrails
 
+- **No write without confirmation** — Never create, edit, or delete files
+  without the user explicitly agreeing to the content first. Step 4 (Present &
+  Confirm) is mandatory in every session.
 - **Don't implement** — Never write application code. Creating exploration files
   is capturing thinking, not implementing. If the user asks to implement, suggest
   finishing exploration and using a change proposal workflow instead.
-- **Don't force structure in Explore Mode** — Let exploration happen freely, offer
-  capture when insights crystallize.
-- **Do capture in Capture Mode** — When the user says "explore X properly" or
-  "capture X", they're asking for structured output. Create it.
+- **Don't force structure before exploration** — Let the user explore freely.
+  Premature structure shuts down thinking.
+- **Do capture when the user is ready** — When the user says "capture it" or
+  "write it up", stop exploring and move to Present & Confirm.
 - **Do read related areas first** — New areas should always link to existing ones.
   Stale or missing links are worse than no links.
 - **Do keep READMEs polished** — notes.md can be messy, but README.md is the
   public face of an area.
 - **Do update _index.md** — A new area without a dashboard entry is invisible.
+- **Do loop back** — After writing, always ask "what next?" to keep the
+  exploration going.
 - **Don't create changes** — That's the next step, not this skill's job.

@@ -1,0 +1,98 @@
+{
+  "skill_name": "structured-explore",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I'm wondering about how we handle authentication in this project. What approaches could we take?",
+      "expected_output": "Discussion with diagrams and questions, NO files created in exploration/. At most an offer to capture at the end.",
+      "files": [],
+      "expectations": [
+        "The agent does NOT create any files in the exploration/ directory",
+        "The agent asks open-ended questions to explore the topic",
+        "The agent offers to capture findings only after discussion, not before",
+        "The agent does not force structure prematurely"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "I'm thinking about the data model. We have users, organizations, and teams. Users can belong to multiple organizations. Teams are within organizations. How should we model this?",
+      "expected_output": "Iterative discussion without immediate file creation. Agent reads existing exploration areas, presents analysis, asks questions, then offers to capture.",
+      "files": [],
+      "expectations": [
+        "The agent does NOT create files immediately upon receiving the prompt",
+        "The agent reads existing exploration areas if they exist",
+        "The agent presents analysis and asks questions before offering to write",
+        "The agent asks 'shall I capture this?' or similar before creating files"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "I've been thinking about our caching strategy. We currently don't cache anything. I think we should explore Redis vs in-memory vs CDN caching. Actually, capture these findings — let me explore caching properly and document it.",
+      "expected_output": "Discussion first, then present what to write, then create area files only after user confirms content.",
+      "files": [],
+      "expectations": [
+        "The agent discusses the topic with diagrams or questions first",
+        "The agent pauses to present what they'd write before creating files",
+        "The agent asks 'does this look right?' or 'shall I write this up?' before creating files",
+        "The agent creates the area directory and files only after user confirmation",
+        "The agent links the new area to _index.md dashboard"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Let me explore the API design properly. We need REST endpoints for CRUD operations on projects, tasks, and comments. I want to think through the URL structure, response formats, and error handling.",
+      "expected_output": "Faster discussion (user wants structured output), ASCII diagrams, then present content before creating area files with Summary, Scope, Findings, Open Questions.",
+      "files": [],
+      "expectations": [
+        "The agent uses ASCII diagrams or structured analysis to discuss the API design",
+        "The agent presents the planned content to the user before creating files",
+        "The agent asks for confirmation before writing",
+        "The agent creates proper exploration area files with Summary, Scope, Findings, Open Questions",
+        "The agent updates _index.md with the new area"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Record these findings about the database schema as an exploration area: we need to support soft deletes, audit logging, and multi-tenancy. We're using PostgreSQL. Let me think about how to structure this.",
+      "expected_output": "Discussion of schema design, then present summary and findings for confirmation, then create area only after user confirms. Agent asks 'what next?' after writing.",
+      "files": [],
+      "expectations": [
+        "The agent discusses the schema design with the user before writing",
+        "The agent presents the summary and key findings for confirmation",
+        "The agent creates the area only after user confirms the content",
+        "The agent asks 'what next?' after writing"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Let me revisit our auth exploration. I think we missed something about OAuth2 flows. Can we add that to the findings?",
+      "expected_output": "Agent reads existing area README.md, discusses new angle, presents proposed update, then edits files with updated last-updated timestamp.",
+      "files": [],
+      "expectations": [
+        "The agent reads the existing area's README.md first",
+        "The agent discusses the new OAuth2 angle before editing",
+        "The agent presents the proposed update to the user before editing files",
+        "The agent updates last-updated in frontmatter after editing"
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "Write a function that connects to PostgreSQL and runs a migration script.",
+      "expected_output": "Skill tells user this is implementation, not exploration. Does NOT create exploration files.",
+      "files": [],
+      "expectations": [
+        "The skill does NOT create exploration files",
+        "The skill suggests using a different workflow for implementation"
+      ]
+    },
+    {
+      "id": 8,
+      "prompt": "What's the difference between SQL and NoSQL databases?",
+      "expected_output": "Direct answer without creating exploration files.",
+      "files": [],
+      "expectations": [
+        "The agent answers the question directly without creating exploration files"
+      ]
+    }
+  ]
+}
