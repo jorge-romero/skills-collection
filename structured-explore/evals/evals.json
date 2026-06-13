@@ -93,6 +93,33 @@
       "expectations": [
         "The agent answers the question directly without creating exploration files"
       ]
+    },
+    {
+      "id": 9,
+      "prompt": "Let's explore the API design. We have projects and tasks. I want to think through the URL structure. Actually, capture this — I want it in exploration/. Oh and by the way, there's already a 'data-model' area in exploration/ that covers the DB schema. Make sure to link to it.",
+      "expected_output": "Creates API design area that links to data-model. After writing, runs coherence check and finds data-model's Feeds into doesn't mention API design. Presents this to user for resolution.",
+      "files": [],
+      "expectations": [
+        "The agent creates an API design area that links to the existing data-model area",
+        "The agent adds the new area to _index.md dashboard",
+        "After writing, the agent runs the coherence checker script",
+        "The agent presents coherence issues (missing backlink in data-model) to the user",
+        "The agent asks the user how to resolve each issue before fixing it"
+      ]
+    },
+    {
+      "id": 10,
+      "prompt": "Let me revisit our caching strategy exploration. I think we need to add a section about CDN caching to the caching area. We already have 'caching' in exploration/ which depends on 'data-model'. The data-model area doesn't have caching in its Feeds into though — can you check that too?",
+      "expected_output": "Reads existing caching area, discusses CDN caching, presents update, edits files. Runs coherence check, notices the bidirectional miss between caching and data-model. Presents issues.",
+      "files": [],
+      "expectations": [
+        "The agent reads the existing caching area README.md and notes.md",
+        "The agent discusses the CDN caching angle before editing",
+        "The agent presents the proposed update before writing",
+        "After writing, the agent runs the coherence checker",
+        "The agent reports the bidirectional link issue between caching and data-model",
+        "The agent asks the user how to resolve the link issue"
+      ]
     }
   ]
 }

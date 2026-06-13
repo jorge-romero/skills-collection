@@ -73,8 +73,23 @@ This is THE core pattern. Every interaction follows this loop:
          └──────────┬───────────┘
                     │
                     ▼
+         ┌──────────────────────────┐
+         │ 5b. Link Coherence Check │  ◄── run script, resolve issues
+         └──────────┬───────────────┘
+                    │
+                    ▼
          ┌──────────────────────┐
-         │  6. "What next?"     │
+         │  6. Update _index.md │
+         └──────────┬───────────┘
+                    │
+                    ▼
+         ┌────────────────────────────┐
+         │ 6b. Semantic Coherence     │  ◄── review linked areas for consistency
+         └──────────┬─────────────────┘
+                    │
+                    ▼
+         ┌──────────────────────┐
+         │  7. "What next?"     │
          │  └─ loop back to (1) │
          └──────────────────────┘
 ```
@@ -351,6 +366,32 @@ Then fill the README:
 
 Create `notes.md` with raw thoughts, URLs, code snippets, references.
 
+### Step 5b: Link Coherence Check
+
+After writing the area files, verify structural link integrity before updating
+the dashboard. This catches missing backlinks, dangling references, and orphans
+before they accumulate.
+
+1. Run the coherence checker from the project root:
+   ```bash
+   python scripts/check_link_coherence.py
+   ```
+2. Present each issue to the user along with a suggested resolution:
+   - **Bidirectional miss**: "Area B's Depends on doesn't mention this area.
+     Should we add it?"
+   - **Dangling link**: "This area links to 'ghost-area/' which doesn't exist.
+     Remove the link or create the area?"
+   - **Status mismatch**: "This area depends on 'legacy-module' which is
+     'dropped'. Reconsider your dependency?"
+   - **Orphan area**: "Area 'api-design' exists on disk but isn't in the
+     dashboard. Add it?"
+3. Apply the agreed resolution (edit the relevant area's Links section or
+   `_index.md`).
+4. Re-run the checker to confirm all issues are resolved before moving on.
+
+The script is purely diagnostic — it never auto-fixes. You decide what to do
+with each finding.
+
 ### Step 6: Update _index.md
 
 1. Add a row to the **Status Dashboard** (for new areas)
@@ -359,6 +400,30 @@ Create `notes.md` with raw thoughts, URLs, code snippets, references.
 
 Always update `_index.md` before finishing — a new area without a dashboard entry
 is invisible. A session without a log entry is lost.
+
+### Step 6b: Semantic Coherence Check
+
+After the dashboard is updated, review linked areas for conceptual consistency.
+This catches contradictions and stale assumptions that structural checks miss.
+
+1. Read the README.md of every area listed in Depends on and Feeds into
+2. Read relevant Cross-Cutting Decisions from `_index.md`
+3. Compare against what was just written. Surface any:
+   - **Contradictions**: findings in the new area that conflict with findings
+     in a linked area. Explain the conflict so the user can decide which to
+     revise.
+   - **Stale decisions**: a cross-cutting decision that the new findings
+     invalidate or make obsolete.
+   - **Answered questions**: linked areas' Open Questions that your findings
+     resolve. Flag them so the user can close them out.
+   - **Status signals**: areas whose status may need updating (e.g., a linked
+     area's findings are superseded, or a dependency just became `saturated`).
+4. Present these as observations, not commands. The user decides what to do.
+5. Apply any agreed-upon changes (update findings, close questions, adjust
+   statuses, revise decisions).
+
+This step keeps the exploration coherent as it grows. Without it, two areas
+can silently contradict each other.
 
 ### Step 7: Loop Back
 
@@ -373,7 +438,9 @@ When the user asks to explore within an existing area, or findings update one:
 2. Explore the new angle (steps 2-3 of the loop)
 3. Present & Confirm: "I'd add [finding X] and refine [question Y] — agree?"
 4. If the user agrees, edit the README and update `last-updated` in frontmatter
-5. Ask: "What next?"
+5. Run the coherence check (Step 5b) and semantic check (Step 6b) — the
+   update may have created inconsistencies with linked areas
+6. Ask: "What next?"
 
 ## Nuanced Actions
 
@@ -410,4 +477,10 @@ there, set the other to `dropped` with a redirect link.
 - **Do update _index.md** — A new area without a dashboard entry is invisible.
 - **Do loop back** — After writing, always ask "what next?" to keep the
   exploration going.
+- **Do check link coherence** — After writing, always run the coherence checker
+  and resolve structural issues. A stale link graph undermines the value of the
+  exploration.
+- **Do check semantic coherence** — After updating the dashboard, always read
+  linked areas and surface contradictions. Silent inconsistencies compound over
+  time.
 - **Don't create changes** — That's the next step, not this skill's job.
